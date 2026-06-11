@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japan Life Guide - Prototype</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0A3663;
+            --bg-light: #F4F6F9;
+            --text-dark: #333333;
+            --text-muted: #666666;
+            --green-accent: #2E7D32;
+            --orange-accent: #EF6C00;
+            --red-accent: #C62828;
+            --sky-blue: #E3F2FD;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* スマホの本体枠を再現 */
+        .phone-container {
+            width: 390px;
+            height: 844px;
+            background-color: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 12px solid #333;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ステータスバー（時計など） */
+        .status-bar {
+            height: 44px;
+            background-color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .status-icons i {
+            margin-left: 4px;
+        }
+
+        /* 画面全体のコンテンツエリア */
+        .screen-content {
+            flex: 1;
+            overflow-y: auto;
+            background-color: var(--bg-light);
+            padding-bottom: 90px; /* ナビバーのスペース */
+        }
+
+        /* 非表示用クラス */
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- 1. ホーム画面 --- */
+        .home-header {
+            background-color: white;
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        .app-logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+        .hero-banner {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            margin: 16px;
+            padding: 20px;
+            border-radius: 16px;
+            position: relative;
+        }
+        .hero-banner h2 {
+            font-size: 18px;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+        }
+        .grid-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 16px;
+        }
+        .menu-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .menu-card:active { transform: scale(0.95); }
+        .menu-card i { font-size: 32px; margin-bottom: 8px; }
+        .card-garbage i { color: var(--green-accent); }
+        .card-train i { color: var(--primary-blue); }
+        .card-manner i { color: var(--orange-accent); }
+        .card-emergency i { color: var(--red-accent); }
+        
+        .lang-selector {
+            margin: 20px 16px;
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- 2. ゴミの分別画面 --- */
+        .screen-header {
+            background-color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            border-bottom: 1px solid #eee;
+        }
+        .back-btn { cursor: pointer; margin-right: 16px; font-size: 20px; }
+        
+        .scan-container {
+            padding: 16px;
+            text-align: center;
+        }
+        .scan-window {
+            width: 100%;
+            height: 200px;
+            background-color: #ddd;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-window img {
+            width: 60%;
+            object-fit: contain;
+        }
+        .result-box {
+            background-color: #E8F5E9;
+            border: 2px solid var(--green-accent);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            text-align: left;
+        }
+        .result-title {
+            color: var(--green-accent);
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .how-to-throw {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            text-align: left;
+        }
+        .action-btn {
+            background-color: var(--green-accent);
+            color: white;
+            text-align: center;
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- 3. 電車の乗り方画面 --- */
+        .route-search-box {
+            background-color: white;
+            padding: 16px;
+            margin: 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .input-row i { margin-right: 12px; width: 20px; text-align: center; }
+        .input-row.from i { color: var(--green-accent); }
+        .input-row.to i { color: var(--red-accent); }
+        .route-card {
+            background-color: white;
+            padding: 16px;
+            margin: 0 16px 12px 16px;
+            border-radius: 12px;
+            border-left: 6px solid var(--primary-blue);
+        }
+        .route-time {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* --- 4. マナー・ルール画面 --- */
+        .tabs {
+            display: flex;
+            background-color: white;
+            padding: 8px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 13px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        .manner-img-box {
+            background-color: #ECEFF1;
+            height: 180px;
+            margin: 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: #b0bec5;
+        }
+        .checklist {
+            padding: 0 16px;
+        }
+        .check-item {
+            background-color: white;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .check-item i { color: var(--green-accent); margin-right: 12px; }
+
+        /* 固定下部ナビゲーションバー */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 76px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 12px;
+            z-index: 10;
+        }
+        .nav-item {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            flex: 1;
+        }
+        .nav-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .nav-item.active {
+            color: var(--primary-blue);
+        }
+        /* 真ん中のカメラボタンを目立たせる */
+        .nav-item.camera-center {
+            position: relative;
+            top: -15px;
+            background-color: var(--primary-blue);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(10,54,99,0.3);
+            flex: none;
+        }
+        .nav-item.camera-center i { margin-bottom: 0; color: white; font-size: 24px; }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <div class="status-bar">
+            <div>9:41</div>
+            <div class="status-icons">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-three-quarters"></i>
+            </div>
+        </div>
+
+        <div id="screen-home" class="screen-content">
+            <div class="home-header">
+                <div class="app-logo">Japan Life Guide</div>
+            </div>
+            <div class="hero-banner">
+                <h2>日本での観光をサポート！</h2>
+                <p style="font-size: 13px; color: var(--text-muted);">困ったときは、いつでも調べてみてください。</p>
+            </div>
+            
+            <div class="grid-menu">
+                <div class="menu-card card-garbage" onclick="switchScreen('screen-garbage')">
+                    <i class="fa-solid fa-trash"></i>
+                    <div style="font-weight:bold; font-size:14px;">ゴミの分別</div>
+                </div>
+                <div class="menu-card card-train" onclick="switchScreen('screen-train')">
+                    <i class="fa-solid fa-train"></i>
+                    <div style="font-weight:bold; font-size:14px;">電車の乗り方</div>
+                </div>
+                <div class="menu-card card-manner" onclick="switchScreen('screen-manner')">
+                    <i class="fa-solid fa-heart"></i>
+                    <div style="font-weight:bold; font-size:14px;">マナー・ルール</div>
+                </div>
+                <div class="menu-card card-emergency" onclick="alert('緊急ダイヤル(110/119)案内や、現在地の避難所情報を表示します。')">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div style="font-weight:bold; font-size:14px;">緊急時の対応</div>
+                </div>
+            </div>
+
+            <div class="lang-selector">
+                <span style="font-size:14px; font-weight:bold;">Language / 言語</span>
+                <span style="color:var(--text-muted); font-size:14px;">日本語 <i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+        </div>
+
+        <div id="screen-garbage" class="screen-content hidden">
+            <div class="screen-header">
+                <i class="fa-solid fa-chevron-left back-btn" onclick="switchScreen('screen-home')"></i>
+                <div>ゴミの分別</div>
+            </div>
+            <div class="scan-container">
+                <div class="scan-window">
+                    <i class="fa-solid fa-bottle-water" style="font-size: 100px; color: #90CAF9;"></i>
+                </div>
+                <div class="result-box">
+                    <div class="result-title">判定結果</div>
+                    <p style="font-weight:bold; margin-top:4px;">ペットボトル / Plastic Bottles</p>
+                    <p style="font-size:13px; color:var(--green-accent); margin-top:2px;">リサイクルできます</p>
+                </div>
+                <div class="how-to-throw">
+                    <p style="font-weight:bold; margin-bottom:8px;">捨て方</p>
+                    <p style="font-size:14px; line-height:1.4; color:var(--text-muted);">
+                        ラベルをはがして、キャップとラベルは「燃えるゴミ」へ捨ててください。本体は「資源ゴミ」です。
+                    </p>
+                </div>
+                <div class="action-btn" onclick="alert('周辺のスマートゴミ箱マップを開きます。')">
+                    <i class="fa-solid fa-map-location-dot"></i> 近くのゴミ箱を探す
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-train" class="screen-content hidden">
+            <div class="screen-header">
+                <i class="fa-solid fa-chevron-left back-btn" onclick="switchScreen('screen-home')"></i>
+                <div>電車の乗り方</div>
+            </div>
+            <div class="route-search-box">
+                <div class="input-row from">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div>
+                        <div style="font-size:11px; color:var(--text-muted);">現在地</div>
+                        <div style="font-weight:bold;">Shinjuku Station (新宿駅)</div>
+                    </div>
+                </div>
+                <div style="border-left: 2px dashed #ccc; height: 20px; margin-left: 25px;"></div>
+                <div class="input-row to">
+                    <i class="fa-solid fa-flag"></i>
+                    <div>
+                        <div style="font-size:11px; color:var(--text-muted);">行き先</div>
+                        <div style="font-weight:bold;">Tokyo Station (東京駅)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="route-card">
+                <div class="route-time">
+                    <span>ルート1 (JR山手線)</span>
+                    <span style="color:var(--primary-blue);">¥210</span>
+                </div>
+                <p style="font-size:14px; color:var(--text-muted);">所要時間: 約18分</p>
+                <p style="font-size:13px; margin-top:8px; background:#f0f0f0; padding:6px; border-radius:6px;">
+                    <i class="fa-solid fa-circle-info"></i> <strong>のりば:</strong> 1番線ホーム (渋谷・品川方面)
+                </p>
+            </div>
+
+            <div class="route-card" style="border-left-color: #757575;">
+                <div class="route-time">
+                    <span>ルート2 (東京メトロ丸ノ内線)</span>
+                    <span>¥210</span>
+                </div>
+                <p style="font-size:14px; color:var(--text-muted);">所要時間: 約20分</p>
+            </div>
+
+            <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:16px;">
+                <i class="fa-solid fa-credit-card"></i> 交通系ICカード(Suica / PASMO)が使えます
+            </p>
+        </div>
+
+        <div id="screen-manner" class="screen-content hidden">
+            <div class="screen-header">
+                <i class="fa-solid fa-chevron-left back-btn" onclick="switchScreen('screen-home')"></i>
+                <div>マナー・ルール</div>
+            </div>
+            <div class="tabs">
+                <div class="tab active">電車・バス</div>
+                <div class="tab">飲食店</div>
+                <div class="tab">温泉・施設</div>
+                <div class="tab">その他</div>
+            </div>
+
+            <div class="manner-img-box">
+                <i class="fa-solid fa-volume-xmark" style="color: var(--orange-accent);"></i>
+            </div>
+            <p style="text-align:center; font-weight:bold; margin-bottom:16px;">静かにしましょう / Keep Quiet</p>
+
+            <div class="checklist">
+                <div class="check-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span style="font-size:14px;">車内では静かにしましょう</span>
+                </div>
+                <div class="check-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span style="font-size:14px;">通話は控え、マナーモードに設定します</span>
+                </div>
+                <div class="check-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span style="font-size:14px;">優先席付近では混雑時は電源を切りましょう</span>
+                </div>
+                <div class="check-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span style="font-size:14px;">大きな荷物は前に抱えましょう</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="switchScreen('screen-home')">
+                <i class="fa-solid fa-house"></i>
+                ホーム
+            </div>
+            <div class="nav-item" onclick="alert('周辺の観光スポットやサポート施設を表示します。')">
+                <i class="fa-solid fa-map-pin"></i>
+                スポット
+            </div>
+            <div class="nav-item camera-center" onclick="switchScreen('screen-garbage')">
+                <i class="fa-solid fa-camera"></i>
+            </div>
+            <div class="nav-item" onclick="alert('お気に入りしたルートやマナーを保存します。')">
+                <i class="fa-solid fa-bookmark"></i>
+                お気に入り
+            </div>
+            <div class="nav-item" onclick="alert('アプリの設定・言語切り替え画面です。')">
+                <i class="fa-solid fa-gear"></i>
+                設定
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchScreen(screenId) {
+            // すべての画面を隠す
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-garbage').classList.add('hidden');
+            document.getElementById('screen-train').classList.add('hidden');
+            document.getElementById('screen-manner').classList.add('hidden');
+
+            // 対象の画面だけを表示
+            document.getElementById(screenId).classList.remove('hidden');
+
+            // ナビゲーションバーのアクティブ状態を更新
+            const navHome = document.getElementById('nav-home');
+            if (screenId === 'screen-home') {
+                navHome.classList.add('active');
+            } else {
+                navHome.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
